@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "YbJpI2kt51mxyCzzN8w3mXaZKm+6R/KwJEXnmiHGDL86PQWAlaE4oX4sLWhcAordWFPYjbpgQrk0f7uJM/OCEQ==",
+  "success": true,
+  "projectFilePath": "/home/computerelite/rider/craft/craft/craft.csproj",
+  "expectedPackageFiles": [
+    "/home/computerelite/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.32/microsoft.aspnetcore.app.ref.6.0.32.nupkg.sha512"
+  ],
+  "logs": []
+}
