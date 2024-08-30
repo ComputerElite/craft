@@ -7,4 +7,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Frontend\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\ComputerUtils\ComputerUtils\ComputerUtils.csproj" />
+    </ItemGroup>
+
 </Project>

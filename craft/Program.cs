@@ -1,3 +1,12 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿namespace craft
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Initializor i = new Initializor();
+            i.Start();
+        }
+    }
+}
 
-Console.WriteLine("Hello, World!");
