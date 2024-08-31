@@ -8,6 +8,7 @@ public class Config
 {
     public List<FileSystemFileProvider> FileSystemFileProviders { get; set; } = new();
     public List<User> Users { get; set; } = new();
+    public List<UserSession> sessions { get; set; } = new();
     public List<CraftPermission> Permissions { get; set; } = new();
 
     public static Config? Instance;

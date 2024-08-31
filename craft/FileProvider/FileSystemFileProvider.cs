@@ -6,7 +6,6 @@ namespace craft.FileProvider;
 public class FileSystemFileProvider : IFileProvider
 {
     public string? RootPath { get; set; }
-    
     public string? MountPoint { get; set; }
     string GetRealPath(string path)
     {

@@ -32,7 +32,8 @@ public class WebServer
     
     public void DoGetFile(ServerRequest request, string path)
     {
-        User u = GetUserBySession(request);
+        path = Path.GetFullPath(path);
+        User? u = GetUserBySession(request);
 
         IFileProvider? fp = _fileProviderManager.GetFileProvider(path);
         if(fp == null)
@@ -55,10 +56,36 @@ public class WebServer
             });
     }
     
+    public void DoGetFileMeta(ServerRequest request, string path)
+    {
+        path = Path.GetFullPath(path);
+        User? u = GetUserBySession(request);
+
+        IFileProvider? fp = _fileProviderManager.GetFileProvider(path);
+        if(fp == null)
+        {
+            ApiError.SendUnauthorized(request);
+            return;
+        }
+        CraftFile? s = fp.GetFile(path);
+        if(s == null || s.requestedStream == null)
+        {
+            ApiError.SendNotFound(request);
+            return;
+        }
+
+
+        request.ForwardStream(s.requestedStream, s.requestedStream.Length, HttpServer.GetContentTpe("file." + s.extension),
+            Encoding.Default, 200, true, new Dictionary<string, string>
+            {
+                {"Content-Disposition", "attachment; filename=\"" + s.name + "\""}
+            });
+    }
+    
     public void DoGetFiles(ServerRequest request, string path)
     {
         path = Path.GetFullPath(path);
-        User u = GetUserBySession(request);
+        User? u = GetUserBySession(request);
 
         IFileProvider? fp = _fileProviderManager.GetFileProvider(path);
         if(fp == null)
@@ -99,6 +126,18 @@ public class WebServer
             }
 
             DoGetFile(request, path);
+            return true;
+        });
+        _server.AddRoute("GET", "/api/v1/file_meta", request =>
+        {
+            string? path = request.queryString.Get("path");
+            if(path == null)
+            {
+                ApiError.SendMissingKey("path", request);
+                return true;
+            }
+
+            DoGetFileMeta(request, path);
             return true;
         });
         _server.StartServer(8383);    

@@ -6,7 +6,7 @@ public class User
     public string? username { get; set; }
     public string? password { get; set; }
     public bool isPublicLinkUser { get; set; }
-
+    
     public static User GuestUser = new User()
     {
         uuid = "guest",
