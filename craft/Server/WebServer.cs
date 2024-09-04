@@ -94,7 +94,7 @@ public class WebServer
             ApiError.SendUnauthorized(request);
             return;
         }
-        if (!_fileProviderManager.CheckPermission(path, u, CraftPermissionType.READ))
+        if (!_fileProviderManager.CheckPermission(path, u, CraftPermissionType.Read))
         {
             ApiError.SendNotFound(request);
             return;

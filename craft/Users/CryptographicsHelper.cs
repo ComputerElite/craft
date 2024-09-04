@@ -10,10 +10,10 @@ public class CryptographicsHelper
         return Hasher.GetSHA256OfString(input).ToLower();
     }
 
-    public static string GetRandomString()
+    public static string GetRandomString(int minLength = 4, int maxLength = 6)
     {
         Random random = new Random();
-        int length = random.Next(4, 6);
+        int length = minLength == maxLength ? minLength : random.Next(minLength, maxLength);
         string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++)

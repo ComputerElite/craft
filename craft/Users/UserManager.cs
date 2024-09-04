@@ -4,7 +4,8 @@ namespace craft.Users;
 
 public class UserManager
 {
-    public List<RunningLogin> runningLogins = new List<RunningLogin>();
+    public List<Challenge> runningLogins = new ();
+    public List<UserSession> sessions = new ();
     public UserManager()
     {
         
@@ -30,11 +31,12 @@ public class UserManager
         {
             return new LoginResponse { error = "Invalid username or password" };
         }
-        RunningLogin rl = new RunningLogin
+        Challenge rl = new Challenge
         {
             userUuid = u.uuid,
             nonce = CryptographicsHelper.GetRandomString(),
-            challengeId = Guid.NewGuid().ToString()
+            challengeId = Guid.NewGuid().ToString(),
+            type = ChallengeType.Password
         };
         // remove previous login attempts for this user
         runningLogins.RemoveAll(x => x.userUuid == u.uuid);
@@ -48,12 +50,32 @@ public class UserManager
         };
     }
 
+    public UserSession CreateUserSession(User user, TimeSpan validFor)
+    {
+        return CreateUserSession(user, DateTime.UtcNow + validFor);
+    }
+
+    public UserSession CreateUserSession(User user, DateTime validUntil)
+    {
+        UserSession session = new UserSession
+        {
+            userUuid = user.uuid,
+            creationDate = DateTime.UtcNow,
+            lastAccess = DateTime.UtcNow,
+            validUnti = validUntil,
+            origin = null,
+            sessionId = CryptographicsHelper.GetRandomString(100, 100)
+        };
+        sessions.Add(session);
+        return session;
+    }
+
     public LoginResponse Login(LoginRequest request)
     {
-        RunningLogin? rl = runningLogins.FirstOrDefault(x => x.challengeId == request.challengeId);
+        Challenge? rl = runningLogins.FirstOrDefault(x => x.challengeId == request.challengeId && x.type == ChallengeType.Password);
         if(rl == null)
         {
-            return new LoginResponse { error = "Challenge with this id not found" };
+            return new LoginResponse { error = "Password challenge with this id not found" };
         }
         runningLogins.Remove(rl);
         User? u = GetUserByUUID(rl.userUuid);
@@ -64,6 +86,10 @@ public class UserManager
         
         // hash password
         string passwordHash = CryptographicsHelper.GetHash(u.password + rl.nonce + request.cnonce);
+        if (request.passwordHash == null)
+        {
+            return new LoginResponse { error = "No password hash specified" };
+        }
         if (passwordHash.ToLower() != request.passwordHash.ToLower())
         {
             return new LoginResponse { error = "Password incorrect" };
@@ -71,14 +97,17 @@ public class UserManager
         
         if (u.TwoFactorEnabled)
         {
-            return new LoginResponse { success = true, requires2fa = true };
+            Challenge newRl = new Challenge { challengeId = Guid.NewGuid().ToString(), userUuid = u.uuid , type = ChallengeType.TOTP};
+            runningLogins.Add(newRl);
+            return new LoginResponse { success = true, requires2fa = true, challengeId = newRl.challengeId};
         }
-        
-        // ToDo, create session for user
+
+        UserSession session = CreateUserSession(u, new TimeSpan(0, 1, 0, 0)); // Sessions are valid for 1 hour
 
         return new LoginResponse()
         {
-            success = true
+            success = true,
+            sessionId = session.sessionId
         };
     }
 }

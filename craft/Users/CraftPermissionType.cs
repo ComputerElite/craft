@@ -2,6 +2,6 @@ namespace craft.Users;
 
 public enum CraftPermissionType
 {
-    READ,
-    WRITE
+    Read = 0,
+    ReadWrite = 1 // writing should always be reading as well
 }

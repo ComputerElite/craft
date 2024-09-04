@@ -12,7 +12,7 @@ public class LoginResponse
 {
     public bool? requires2fa { get; set; }
     public string? nonce { get; set; }
-    public string? session { get; set; }
+    public string? sessionId { get; set; }
     public string? error { get; set; }
     public bool success { get; set; } = false;
     public string? challengeId { get; set; }
