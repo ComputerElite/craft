@@ -1,0 +1,48 @@
+:root {
+    --txt-color: #EEE;
+    --accent-color: #9d00ff;
+    --accent-color-transparent: #9d00ff22;
+    --bg-color: #333;
+}
+
+button {
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid var(--accent-color);
+    margin: 5px;
+    background-color: #333;
+    color: #EEE;
+}
+
+input {
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid var(--accent-color);
+    margin: 5px;
+    background-color: var(--bg-color);
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url("$lib/Open_Sans/static/OpenSans-Regular.ttf") format('truetype');
+}
+
+body {
+    color: var(--txt-color);
+    font-family: "Open Sans";
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: -1;
+    background-image: url("$lib/images/bg.png");
+    background-size: cover;
+    transform: scale(1.1);
+    overflow: hidden;
+    filter: blur(20px) brightness(0.5);
+}

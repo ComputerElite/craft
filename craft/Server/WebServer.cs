@@ -4,6 +4,7 @@ using System.Text.Json;
 using ComputerUtils.Logging;
 using ComputerUtils.Webserver;
 using craft.FileProvider;
+using craft.Server.ApiTypes;
 using craft.Users;
 
 namespace craft.Server;
@@ -138,6 +139,44 @@ public class WebServer
             }
 
             DoGetFileMeta(request, path);
+            return true;
+        });
+        _server.AddRoute("POST", "/api/v1/user/login", request =>
+        {
+            LoginRequest? r = null;
+            try
+            {
+                r = JsonSerializer.Deserialize<LoginRequest>(request.bodyString);
+            } catch(Exception e)
+            {
+                ApiError.MalformedRequest(request);
+            }
+            if(r == null)
+            {
+                ApiError.MalformedRequest(request);
+                return true;
+            }
+            LoginResponse response = _userManager.Login(r);
+            request.SendString(JsonSerializer.Serialize(response), "application/json", 200);
+            return true;
+        });
+        _server.AddRoute("POST", "/api/v1/user/start_login", request =>
+        {
+            LoginRequest? r = null;
+            try
+            {
+                r = JsonSerializer.Deserialize<LoginRequest>(request.bodyString);
+            } catch(Exception e)
+            {
+                ApiError.MalformedRequest(request);
+            }
+            if(r == null)
+            {
+                ApiError.MalformedRequest(request);
+                return true;
+            }
+            LoginResponse response = _userManager.InitiateLogin(r.username);
+            request.SendString(JsonSerializer.Serialize(response), "application/json", 200);
             return true;
         });
         _server.StartServer(8383);    

@@ -6,11 +6,12 @@ public class User
     public string? username { get; set; }
     public string? password { get; set; }
     public bool isPublicLinkUser { get; set; }
+    public bool TwoFactorEnabled { get; set; }
     
     public static User GuestUser = new User()
     {
         uuid = "guest",
-        username = "Guest",
-        password = "",
+        username = "guest",
+        password = "test",
     };
 }
