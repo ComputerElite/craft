@@ -1,3 +1,4 @@
+using ComputerUtils.Logging;
 using craft.Users;
 
 namespace craft.FileProvider;
@@ -7,22 +8,41 @@ namespace craft.FileProvider;
 /// </summary>
 public class FileProviderManager
 {
-    private List<FileSystemFileProvider> _fileSystemFileProviders;
+    public List<FileSystemFileProvider> fileSystemFileProviders;
     private PermissionManager _permissionManager;
     
     public FileProviderManager(PermissionManager permissionManager)
     {
-        _fileSystemFileProviders = new List<FileSystemFileProvider>();
-        _fileSystemFileProviders.AddRange(Config.Config.Instance.FileSystemFileProviders);
+        fileSystemFileProviders = new List<FileSystemFileProvider>();
+        fileSystemFileProviders.AddRange(Config.Config.Instance.FileSystemFileProviders);
         _permissionManager = permissionManager;
     }
 
-    public IFileProvider? GetFileProvider(string path)
+    public IFileProvider? GetFileProvider(string path, User user)
     {
+        Logger.Log("Trying to get file provider for " + path);
         if(!path.Contains("/")) return null;
-        string providerMountPoint = "/" + path.Split("/")[1] + "/";
-        IFileProvider? fp = _fileSystemFileProviders.Find(fp => fp.MountPoint == providerMountPoint);
+        string[] pathParts = path.Split("/");
+        if (pathParts.Length < 2)
+        {
+            return null;
+        }
+        if (IsRoot(path))
+        {
+            // MountPoint provider
+            Logger.Log("Providing MountPoint provider");
+            return new MountPointFileProvider(user, _permissionManager, this);
+        }
+        string providerMountPoint = "/" + pathParts[1] + "/";
+        Logger.Log("MountPoint: " + providerMountPoint);
+        IFileProvider? fp = fileSystemFileProviders.Find(fp => fp.MountPoint == providerMountPoint);
+        Logger.Log("Found provider: " + (fp != null));
         return fp;
+    }
+
+    public static bool IsRoot(string path)
+    {
+        return path == "/";
     }
 
     public bool CheckPermission(CraftFile craftFile, User user, CraftPermissionType permissionType)

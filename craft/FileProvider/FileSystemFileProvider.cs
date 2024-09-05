@@ -57,7 +57,6 @@ public class FileSystemFileProvider : IFileProvider
         foreach (var file in info.GetFiles())
         {
             CraftFile craftFile = new CraftFile();
-            craftFile.name = file.Name;
             craftFile.path = Path.Join(path, file.Name);
             craftFile.realPath = file.FullName;
             craftFile.size = file.Length;
@@ -71,7 +70,6 @@ public class FileSystemFileProvider : IFileProvider
         foreach (DirectoryInfo directory in info.GetDirectories())
         {
             CraftFile craftFile = new CraftFile();
-            craftFile.name = directory.Name;
             craftFile.path = Path.Join(path, directory.Name);
             craftFile.realPath = directory.FullName;
             craftFile.size = 0;
@@ -94,7 +92,6 @@ public class FileSystemFileProvider : IFileProvider
         if (!File.Exists(realPath) && !Directory.Exists(realPath)) return null;
         FileInfo info = new FileInfo(realPath);
         CraftFile file = new CraftFile();
-        file.name = info.Name;
         file.realPath = realPath;
         file.path = path;
         file.size = info.Length;

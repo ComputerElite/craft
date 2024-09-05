@@ -12,11 +12,17 @@ public class UserManager
     }
     public User? GetUserBySession(string session)
     {
-        return User.GuestUser;
+        UserSession? s = sessions.Find(x => x.sessionId == session);
+        if(s == null)
+        {
+            return null;
+        }
+        return GetUserByUUID(s.userUuid);
     }
     public User? GetUserByUUID(string uuid)
     {
-        return User.GuestUser;
+        if (uuid == User.GuestUser.uuid) return User.GuestUser;
+        return null;
     }
     public User? GetUserByUsername(string username)
     {

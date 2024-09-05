@@ -25,18 +25,23 @@ public class WebServer
     public User? GetUserBySession(ServerRequest request)
     {
         Cookie? sessionCookie = request.cookies["session"];
-        if(sessionCookie == null) return User.GuestUser;
+        if(sessionCookie == null) return null;
         string session = sessionCookie.Value;
         User? u = _userManager.GetUserBySession(session);
-        return new User {uuid = "test", username = "Test User - Change for production"};
+        return u;
     }
     
     public void DoGetFile(ServerRequest request, string path)
     {
         path = Path.GetFullPath(path);
         User? u = GetUserBySession(request);
+        if (u == null)
+        {
+            ApiError.SendUnauthorized(request);
+            return;
+        }
 
-        IFileProvider? fp = _fileProviderManager.GetFileProvider(path);
+        IFileProvider? fp = _fileProviderManager.GetFileProvider(path, u);
         if(fp == null)
         {
             ApiError.SendUnauthorized(request);
@@ -61,8 +66,13 @@ public class WebServer
     {
         path = Path.GetFullPath(path);
         User? u = GetUserBySession(request);
+        if (u == null)
+        {
+            ApiError.SendUnauthorized(request);
+            return;
+        }
 
-        IFileProvider? fp = _fileProviderManager.GetFileProvider(path);
+        IFileProvider? fp = _fileProviderManager.GetFileProvider(path, u);
         if(fp == null)
         {
             ApiError.SendUnauthorized(request);
@@ -87,8 +97,13 @@ public class WebServer
     {
         path = Path.GetFullPath(path);
         User? u = GetUserBySession(request);
+        if (u == null)
+        {
+            ApiError.SendUnauthorized(request);
+            return;
+        }
 
-        IFileProvider? fp = _fileProviderManager.GetFileProvider(path);
+        IFileProvider? fp = _fileProviderManager.GetFileProvider(path, u);
         if(fp == null)
         {
             ApiError.SendUnauthorized(request);
@@ -96,6 +111,7 @@ public class WebServer
         }
         if (!_fileProviderManager.CheckPermission(path, u, CraftPermissionType.Read))
         {
+            Logger.Log("User '" + u.username +  "' does not have permission to read " + path);
             ApiError.SendNotFound(request);
             return;
         }
