@@ -8,25 +8,8 @@ export async function hashStringSHA256(input) {
     return hashHex;
 }
 
-export function saveSession(sessionId) {
-    setCookie("session", sessionId)
-}
-
-export function setCookie(name, value) {
-    // Set cookie to expire in 1 day
-    let date = new Date(Date.now() + 86400e3);
-    date = date.toUTCString();
-    document.cookie = `${name}=${value};`
-}
-
-export function getCookie(name) {
-    let cookies = document.cookie.split(';');
-    let userCookie = cookies.find(cookie => cookie.startsWith(`${name}=`));
-    if (userCookie) {
-        let userInfo = userCookie.substring(name.length + 1); // remove 'user=' prefix
-        return userInfo
-    }
-    return undefined
+export function saveSession(sessionId, localStorage) {
+    localStorage.session = sessionId;
 }
 
 export function getRandomString() {
@@ -46,9 +29,19 @@ export function getRandomString() {
     return result;
 }
     
-export function fetchJson(path, params) {
+export function fetchJson(path, params, localStorage) {
     if(!params) {
         params = {};
+    }
+    if(!params["headers"]) {
+        params["headers"] = {};
+    }
+    params["credentials"] = "include";
+    if(localStorage) {
+        if(localStorage.session) {
+            console.log("session cookie is " + localStorage.getItem("session"))
+            params["headers"]["Authorization"] = `Bearer ${localStorage.session}`;
+        }
     }
     if(path.startsWith("/")) {
         path = path.substring(1);

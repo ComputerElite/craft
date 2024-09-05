@@ -81,7 +81,7 @@
                         return;
                     }
                     // user should be logged in, save session
-                    saveSession(res.sessionId)
+                    saveSession(res.sessionId, localStorage)
                     goto("/home")
                 })
             })

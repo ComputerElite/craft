@@ -24,14 +24,25 @@ public class WebServer
     
     public User? GetUserBySession(ServerRequest request)
     {
-        Cookie? sessionCookie = request.cookies["session"];
-        if(sessionCookie == null) return null;
-        string session = sessionCookie.Value;
+        string? session = null;
+        string? authorizationHeader = request.context.Request.Headers.Get("Authorization");
+        if(authorizationHeader != null)
+        {
+            if (!authorizationHeader.StartsWith("Bearer ")) return null;
+            session = authorizationHeader.Substring("Bearer ".Length);
+        } else
+        {
+            Cookie? sessionCookie = request.cookies["session"];
+            if(sessionCookie == null) return null;
+            session = sessionCookie.Value;
+        }
+
+        if (session == null) return null;
         User? u = _userManager.GetUserBySession(session);
         return u;
     }
     
-    public void DoGetFile(ServerRequest request, string path)
+    public void DoGetFile(ServerRequest request, string path, bool download)
     {
         path = Path.GetFullPath(path);
         User? u = GetUserBySession(request);
@@ -58,7 +69,7 @@ public class WebServer
         request.ForwardStream(s.requestedStream, s.requestedStream.Length, HttpServer.GetContentTpe("file." + s.extension),
             Encoding.Default, 200, true, new Dictionary<string, string>
             {
-                {"Content-Disposition", "attachment; filename=\"" + s.name + "\""}
+                {"Content-Disposition", (download ? "attachment; " : "") + "filename=\"" + s.name + "\""}
             });
     }
     
@@ -79,18 +90,12 @@ public class WebServer
             return;
         }
         CraftFile? s = fp.GetFile(path);
-        if(s == null || s.requestedStream == null)
+        if(s == null)
         {
             ApiError.SendNotFound(request);
             return;
         }
-
-
-        request.ForwardStream(s.requestedStream, s.requestedStream.Length, HttpServer.GetContentTpe("file." + s.extension),
-            Encoding.Default, 200, true, new Dictionary<string, string>
-            {
-                {"Content-Disposition", "attachment; filename=\"" + s.name + "\""}
-            });
+        request.SendString(JsonSerializer.Serialize(s), "application/json", 200);
     }
     
     public void DoGetFiles(ServerRequest request, string path)
@@ -121,8 +126,11 @@ public class WebServer
     
     public void Start()
     {
+        _server.defaultResponseHeaders.Add("Access-Control-Allow-Credentials", "true");
+        _server.autoServeOptions = true;
         _server.AddRoute("GET", "/api/v1/list_dir", request =>
         {
+            request.allowAllOrigins = true;
             string? path = request.queryString.Get("path");
             if(path == null)
             {
@@ -135,6 +143,7 @@ public class WebServer
         });
         _server.AddRoute("GET", "/api/v1/file", request =>
         {
+            request.allowAllOrigins = true;
             string? path = request.queryString.Get("path");
             if(path == null)
             {
@@ -142,11 +151,12 @@ public class WebServer
                 return true;
             }
 
-            DoGetFile(request, path);
+            DoGetFile(request, path, request.queryString.GetValues(null).Contains("download"));
             return true;
         });
         _server.AddRoute("GET", "/api/v1/file_meta", request =>
         {
+            request.allowAllOrigins = true;
             string? path = request.queryString.Get("path");
             if(path == null)
             {
@@ -159,6 +169,7 @@ public class WebServer
         });
         _server.AddRoute("POST", "/api/v1/user/login", request =>
         {
+            request.allowAllOrigins = true;
             LoginRequest? r = null;
             try
             {
@@ -178,6 +189,7 @@ public class WebServer
         });
         _server.AddRoute("POST", "/api/v1/user/start_login", request =>
         {
+            request.allowAllOrigins = true;
             LoginRequest? r = null;
             try
             {

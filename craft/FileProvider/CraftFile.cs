@@ -10,12 +10,15 @@ public class CraftFile
     {
         get
         {
-            return Path.GetFileName("path");
+            return Path.GetFileName(path);
         }
     }
     public string path { get; set; }
     public string realPath;
 
+    /// <summary>
+    /// Extension without dot
+    /// </summary>
     public string extension
     {
         get
