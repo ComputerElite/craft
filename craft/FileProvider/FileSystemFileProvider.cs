@@ -54,6 +54,24 @@ public class FileSystemFileProvider : IFileProvider
         if(!Directory.Exists(realPath)) return new List<CraftFile>();
         DirectoryInfo info = new DirectoryInfo(realPath);
         List<CraftFile> files = new List<CraftFile>();
+        files.Add(new CraftFile
+        {
+            path = path.Substring(0, path.Substring(0, path.Length - 1).LastIndexOf("/") + 1),
+            isDirectory = true,
+            displayName = ".."
+        });
+        foreach (DirectoryInfo directory in info.GetDirectories())
+        {
+            CraftFile craftFile = new CraftFile();
+            craftFile.path = Path.Join(path, directory.Name) +"/";
+            craftFile.realPath = directory.FullName;
+            craftFile.size = 0;
+            craftFile.lastModified = directory.LastWriteTime;
+            craftFile.created = directory.CreationTime;
+            craftFile.isDirectory = true;
+            craftFile.isFileProviderRoot = false;
+            files.Add(craftFile);
+        }
         foreach (var file in info.GetFiles())
         {
             CraftFile craftFile = new CraftFile();
@@ -67,18 +85,6 @@ public class FileSystemFileProvider : IFileProvider
             files.Add(craftFile);
         }
 
-        foreach (DirectoryInfo directory in info.GetDirectories())
-        {
-            CraftFile craftFile = new CraftFile();
-            craftFile.path = Path.Join(path, directory.Name);
-            craftFile.realPath = directory.FullName;
-            craftFile.size = 0;
-            craftFile.lastModified = directory.LastWriteTime;
-            craftFile.created = directory.CreationTime;
-            craftFile.isDirectory = true;
-            craftFile.isFileProviderRoot = false;
-            files.Add(craftFile);
-        }
         return files;
     }
 

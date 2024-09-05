@@ -33,8 +33,14 @@ public class WebServer
         } else
         {
             Cookie? sessionCookie = request.cookies["session"];
-            if(sessionCookie == null) return null;
-            session = sessionCookie.Value;
+            if (sessionCookie == null)
+            {
+                session = request.queryString.Get("session");
+            }
+            else
+            {
+                session = sessionCookie.Value;
+            }
         }
 
         if (session == null) return null;
@@ -151,7 +157,7 @@ public class WebServer
                 return true;
             }
 
-            DoGetFile(request, path, request.queryString.GetValues(null).Contains("download"));
+            DoGetFile(request, path, request.queryString.GetValues(null)?.Contains("download") ?? false);
             return true;
         });
         _server.AddRoute("GET", "/api/v1/file_meta", request =>

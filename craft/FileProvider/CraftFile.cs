@@ -10,6 +10,8 @@ public class CraftFile
     {
         get
         {
+            if(displayName != null) return displayName;
+            if(path.EndsWith("/")) return Path.GetFileName(path.Substring(0, path.Length - 1));
             return Path.GetFileName(path);
         }
     }
@@ -46,4 +48,5 @@ public class CraftFile
     public DateTime? created { get; set; }
     public bool isDirectory { get; set; }
     public bool isFileProviderRoot { get; set; }
+    public string? displayName;
 }

@@ -12,6 +12,7 @@ export function saveSession(sessionId, localStorage) {
     localStorage.session = sessionId;
 }
 
+
 export function getRandomString() {
     const minLength = 4;
     const maxLength = 6;
@@ -28,7 +29,12 @@ export function getRandomString() {
 
     return result;
 }
-    
+
+export function openFileDownload(craftFile, localStorage) {
+
+    let path = "http://localhost:8383" + `/api/v1/file?path=${craftFile.path}&session=${localStorage.session}`;
+    window.open(path, '_blank');
+}
 export function fetchJson(path, params, localStorage) {
     if(!params) {
         params = {};
