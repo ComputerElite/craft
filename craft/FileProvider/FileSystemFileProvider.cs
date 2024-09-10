@@ -56,7 +56,7 @@ public class FileSystemFileProvider : IFileProvider
         List<CraftFile> files = new List<CraftFile>();
         files.Add(new CraftFile
         {
-            path = path.Substring(0, path.Substring(0, path.Length - 1).LastIndexOf("/") + 1),
+            path = FileProviderManager.GetParent(path),
             isDirectory = true,
             displayName = ".."
         });

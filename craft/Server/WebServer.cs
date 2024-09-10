@@ -22,7 +22,7 @@ public class WebServer
         _userManager = userManager;
     }
     
-    public User? GetUserBySession(ServerRequest request)
+    public CraftUser? GetUserBySession(ServerRequest request)
     {
         string? session = null;
         string? authorizationHeader = request.context.Request.Headers.Get("Authorization");
@@ -44,14 +44,14 @@ public class WebServer
         }
 
         if (session == null) return null;
-        User? u = _userManager.GetUserBySession(session);
+        CraftUser? u = _userManager.GetUserBySession(session);
         return u;
     }
     
     public void DoGetFile(ServerRequest request, string path, bool download)
     {
         path = Path.GetFullPath(path);
-        User? u = GetUserBySession(request);
+        CraftUser? u = GetUserBySession(request);
         if (u == null)
         {
             ApiError.SendUnauthorized(request);
@@ -82,7 +82,7 @@ public class WebServer
     public void DoGetFileMeta(ServerRequest request, string path)
     {
         path = Path.GetFullPath(path);
-        User? u = GetUserBySession(request);
+        CraftUser? u = GetUserBySession(request);
         if (u == null)
         {
             ApiError.SendUnauthorized(request);
@@ -107,7 +107,7 @@ public class WebServer
     public void DoGetFiles(ServerRequest request, string path)
     {
         path = Path.GetFullPath(path);
-        User? u = GetUserBySession(request);
+        CraftUser? u = GetUserBySession(request);
         if (u == null)
         {
             ApiError.SendUnauthorized(request);
@@ -211,6 +211,19 @@ public class WebServer
             }
             LoginResponse response = _userManager.InitiateLogin(r.username);
             request.SendString(JsonSerializer.Serialize(response), "application/json", 200);
+            return true;
+        });
+        _server.AddRoute("GET", "/api/v1/user/my_sessions", request =>
+        {
+            request.allowAllOrigins = true;
+            CraftUser? u = GetUserBySession(request);
+            if (u == null)
+            {
+                ApiError.SendUnauthorized(request);
+                return true;
+            }
+            List<CraftUserSession> sessions = _userManager.GetSessionsForUser(u);
+            request.SendString(JsonSerializer.Serialize(sessions), "application/json", 200);
             return true;
         });
         _server.StartServer(8383);    

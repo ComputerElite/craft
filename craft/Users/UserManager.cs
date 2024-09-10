@@ -1,3 +1,4 @@
+using craft.DB;
 using craft.Server.ApiTypes;
 
 namespace craft.Users;
@@ -5,34 +6,66 @@ namespace craft.Users;
 public class UserManager
 {
     public List<Challenge> runningLogins = new ();
-    public List<UserSession> sessions = new ();
+    public List<CraftUserSession> sessions = new ();
     public UserManager()
     {
         
     }
-    public User? GetUserBySession(string session)
+    
+    public CraftUser? GetUserBySession(string session)
     {
-        UserSession? s = sessions.Find(x => x.sessionId == session);
-        if(s == null)
+        
+        using(CraftDbContext c = new())
         {
-            return null;
+            CraftUserSession? s = c.sessions.FirstOrDefault(x => x.sessionId == session);
+            if(s == null)
+            {
+                return null;
+            }
+            // set last access and check if session is still valid
+            s.lastAccess = DateTime.UtcNow;
+            if (s.validUnti < s.lastAccess)
+            {
+                // remove session if it expired
+                c.sessions.Remove(s);
+                c.SaveChanges();
+                return null;
+            }
+
+            c.SaveChanges();
+            return GetUserByUUID(s.userUuid);
         }
-        return GetUserByUUID(s.userUuid);
     }
-    public User? GetUserByUUID(string uuid)
+    public CraftUser? GetUserByUUID(string uuid)
     {
-        if (uuid == User.GuestUser.uuid) return User.GuestUser;
+        using(CraftDbContext c = new())
+        {
+            CraftUser? u = c.users.FirstOrDefault(x => x.uuid == uuid);
+            if(u != null)
+            {
+                return u;
+            }
+        }
+
         return null;
     }
-    public User? GetUserByUsername(string username)
+    public CraftUser? GetUserByUsername(string username)
     {
-        if (username != User.GuestUser.username) return null;
-        return User.GuestUser;
+        using(CraftDbContext c = new())
+        {
+            CraftUser? u = c.users.FirstOrDefault(x => x.username == username);
+            if(u != null)
+            {
+                return u;
+            }
+        }
+
+        return null;
     }
 
     public LoginResponse InitiateLogin(string username)
     {
-        User? u = GetUserByUsername(username);
+        CraftUser? u = GetUserByUsername(username);
         if(u == null)
         {
             return new LoginResponse { error = "Invalid username or password" };
@@ -56,23 +89,27 @@ public class UserManager
         };
     }
 
-    public UserSession CreateUserSession(User user, TimeSpan validFor)
+    public CraftUserSession CreateUserSession(CraftUser craftUser, TimeSpan validFor)
     {
-        return CreateUserSession(user, DateTime.UtcNow + validFor);
+        return CreateUserSession(craftUser, DateTime.UtcNow + validFor);
     }
 
-    public UserSession CreateUserSession(User user, DateTime validUntil)
+    public CraftUserSession CreateUserSession(CraftUser craftUser, DateTime validUntil)
     {
-        UserSession session = new UserSession
+        CraftUserSession session = new CraftUserSession
         {
-            userUuid = user.uuid,
+            userUuid = craftUser.uuid,
             creationDate = DateTime.UtcNow,
             lastAccess = DateTime.UtcNow,
             validUnti = validUntil,
             origin = null,
             sessionId = CryptographicsHelper.GetRandomString(100, 100)
         };
-        sessions.Add(session);
+        using (CraftDbContext c = new())
+        {
+            c.sessions.Add(session);
+            c.SaveChanges();
+        }
         return session;
     }
 
@@ -84,7 +121,7 @@ public class UserManager
             return new LoginResponse { error = "Password challenge with this id not found" };
         }
         runningLogins.Remove(rl);
-        User? u = GetUserByUUID(rl.userUuid);
+        CraftUser? u = GetUserByUUID(rl.userUuid);
         if(u == null)
         {
             return new LoginResponse { error = "User associated with challenge not found" };
@@ -108,12 +145,49 @@ public class UserManager
             return new LoginResponse { success = true, requires2fa = true, challengeId = newRl.challengeId};
         }
 
-        UserSession session = CreateUserSession(u, new TimeSpan(0, 1, 0, 0)); // Sessions are valid for 1 hour
+        CraftUserSession session = CreateUserSession(u, new TimeSpan(0, 1, 0, 0)); // Sessions are valid for 1 hour
 
         return new LoginResponse()
         {
             success = true,
             sessionId = session.sessionId
         };
+    }
+
+    public List<CraftUserSession> GetSessionsForUser(CraftUser craftUser)
+    {
+        using(CraftDbContext c = new())
+        {
+            return c.sessions.Where(x => x.userUuid == craftUser.uuid).ToList();
+        }
+    }
+
+    public bool IsRootUserNeeded()
+    {
+        
+        using (CraftDbContext c = new())
+        {
+            return c.users.Count(x => x.uuid != CraftUser.DefaultAdminUser.uuid) == 0;
+        }
+    }
+
+    public void CreateDefaultUserIfNotExists()
+    {
+        if (!IsRootUserNeeded()) return;
+        if(DoesDefaultAdminUserExist()) return;
+        using (CraftDbContext c = new())
+        {
+            c.users.Add(CraftUser.DefaultAdminUser);
+            c.permissions.Add(CraftPermission.DefaultAdminPermission);
+            c.SaveChanges();
+        }
+    }
+
+    private bool DoesDefaultAdminUserExist()
+    {
+        using (CraftDbContext c = new())
+        {
+            return c.users.Any(x => x.uuid == CraftUser.DefaultAdminUser.uuid);
+        }
     }
 }

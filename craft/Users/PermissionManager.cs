@@ -18,27 +18,27 @@ public class PermissionManager
     /// Checks if a user has permissions to access a path
     /// </summary>
     /// <param name="path">path to check for</param>
-    /// <param name="user">user to check for</param>
+    /// <param name="craftUser">user to check for</param>
     /// <param name="type">check if permission is greater than type</param>
     /// <returns></returns>
-    public bool HasPermission(string path, User user, CraftPermissionType type)
+    public bool HasPermission(string path, CraftUser craftUser, CraftPermissionType type)
     {
         permissions.ForEach(x => Logger.Log(x.ToString()));
         if(FileProviderManager.IsRoot(path) && type == CraftPermissionType.Read)
         {
             return true;
         }
-        CraftPermission? foundPermission = this.permissions.Where(p => path.StartsWith(p.path) && p.userUuid == user.uuid && p.type >= type).MaxBy(x => x.path.Length);
+        CraftPermission? foundPermission = this.permissions.Where(p => path.StartsWith(p.path) && p.userUuid == craftUser.uuid && p.type >= type).MaxBy(x => x.path.Length);
         return foundPermission != null;
     }
 
     /// <summary>
     /// Gets all permissions for a user that are greater than read
     /// </summary>
-    /// <param name="user"></param>
+    /// <param name="craftUser"></param>
     /// <returns></returns>
-    public List<CraftPermission> GetPermissionsForUser(User user)
+    public List<CraftPermission> GetPermissionsForUser(CraftUser craftUser)
     {
-        return this.permissions.Where(x => x.userUuid == user.uuid&&x.type > CraftPermissionType.Read).ToList();
+        return this.permissions.Where(x => x.userUuid == craftUser.uuid&&x.type > CraftPermissionType.Read).ToList();
     }
 }

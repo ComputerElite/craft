@@ -1,0 +1,23 @@
+version: '3.8'  # Specify Docker Compose version
+
+services:
+  postgres:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    container_name: postgres_local  # Optional: name the container
+    environment:
+      POSTGRES_USER: craft     # Set the PostgreSQL user
+      POSTGRES_PASSWORD: craft  # Set the password for the user
+      POSTGRES_DB: craft   # Create a default database
+    ports:
+      - "5432:5432"  # Map the container's PostgreSQL port to your local machine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist PostgreSQL data
+    networks:
+      - postgres-network  # Optional: Use a custom network
+
+volumes:
+  postgres_data:   # Define a Docker volume to persist the PostgreSQL data
+
+networks:
+  postgres-network:
+    driver: bridge  # Use the bridge driver for the custom network

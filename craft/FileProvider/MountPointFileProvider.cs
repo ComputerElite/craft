@@ -5,13 +5,13 @@ namespace craft.FileProvider;
 public class MountPointFileProvider : IFileProvider
 {
     public string? MountPoint { get; set; } = "";
-    private User? user { get; set; } = null;
+    private CraftUser? CraftUser { get; set; } = null;
     private PermissionManager permissionManager { get; set; }
     private FileProviderManager fileProviderManager { get; set; }
     
-    public MountPointFileProvider(User user, PermissionManager permissionManager,FileProviderManager fileProviderManager)
+    public MountPointFileProvider(CraftUser craftUser, PermissionManager permissionManager,FileProviderManager fileProviderManager)
     {
-        this.user = user;
+        this.CraftUser = craftUser;
         this.permissionManager = permissionManager;
         this.fileProviderManager = fileProviderManager;
     }
@@ -29,9 +29,9 @@ public class MountPointFileProvider : IFileProvider
     public List<CraftFile> GetFilesOfDirectory(string path)
     {
         // Will only return mount points so path does not have to be respected
-        if (this.user == null) return new List<CraftFile>();
+        if (this.CraftUser == null) return new List<CraftFile>();
         // Get user permissions
-        List<CraftPermission> userPermissions = permissionManager.GetPermissionsForUser(user);
+        List<CraftPermission> userPermissions = permissionManager.GetPermissionsForUser(CraftUser);
         // Get all root level permissions
         List<CraftFile> files = new List<CraftFile>();
         foreach(CraftPermission permission in userPermissions)

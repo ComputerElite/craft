@@ -18,7 +18,7 @@ public class FileProviderManager
         _permissionManager = permissionManager;
     }
 
-    public IFileProvider? GetFileProvider(string path, User user)
+    public IFileProvider? GetFileProvider(string path, CraftUser craftUser)
     {
         Logger.Log("Trying to get file provider for " + path);
         if(!path.Contains("/")) return null;
@@ -31,7 +31,7 @@ public class FileProviderManager
         {
             // MountPoint provider
             Logger.Log("Providing MountPoint provider");
-            return new MountPointFileProvider(user, _permissionManager, this);
+            return new MountPointFileProvider(craftUser, _permissionManager, this);
         }
         string providerMountPoint = "/" + pathParts[1] + "/";
         Logger.Log("MountPoint: " + providerMountPoint);
@@ -45,12 +45,17 @@ public class FileProviderManager
         return path == "/";
     }
 
-    public bool CheckPermission(CraftFile craftFile, User user, CraftPermissionType permissionType)
+    public bool CheckPermission(CraftFile craftFile, CraftUser craftUser, CraftPermissionType permissionType)
     {
-        return _permissionManager.HasPermission(craftFile.path, user, permissionType);
+        return _permissionManager.HasPermission(craftFile.path, craftUser, permissionType);
     }
-    public bool CheckPermission(string path, User user, CraftPermissionType permissionType)
+    public bool CheckPermission(string path, CraftUser craftUser, CraftPermissionType permissionType)
     {
-        return _permissionManager.HasPermission(path, user, permissionType);
+        return _permissionManager.HasPermission(path, craftUser, permissionType);
+    }
+
+    public static string GetParent(string path)
+    {
+        return path.Substring(0, path.Substring(0, path.Length - 1).LastIndexOf("/") + 1);
     }
 }
