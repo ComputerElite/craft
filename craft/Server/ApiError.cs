@@ -27,8 +27,8 @@ public class ApiError
         request.SendString(JsonSerializer.Serialize(new ApiError { Message = "Not found" }), "application/json", 404);
     }
 
-    public static void MalformedRequest(ServerRequest request)
+    public static void MalformedRequest(ServerRequest request, string msg = "Malformed request")
     {
-        request.SendString(JsonSerializer.Serialize(new ApiError { Message = "Malformed request" }), "application/json", 400);
+        request.SendString(JsonSerializer.Serialize(new ApiError { Message = msg}), "application/json", 400);
     }
 }

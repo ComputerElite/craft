@@ -7,6 +7,10 @@ using craft.DB;
 using craft.FileProvider;
 using craft.Server.ApiTypes;
 using craft.Users;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 
 namespace craft.Server;
 
@@ -79,6 +83,52 @@ public class WebServer
             Encoding.Default, 200, true, new Dictionary<string, string>
             {
                 {"Content-Disposition", (download ? "attachment; " : "") + "filename=\"" + s.name + "\""}
+            });
+    }
+    public void DoGetFilePreview(ServerRequest request, string path, bool download)
+    {
+        path = Path.GetFullPath(path);
+        CraftUser? u = GetUserBySession(request);
+        if (u == null)
+        {
+            ApiError.SendUnauthorized(request);
+            return;
+        }
+
+        IFileProvider? fp = _fileProviderManager.GetFileProvider(path, u);
+        if(fp == null)
+        {
+            ApiError.SendUnauthorized(request);
+            return;
+        }
+        CraftFile? s = fp.GetReadStream(path);
+        if(s == null || s.requestedStream == null)
+        {
+            ApiError.SendNotFound(request);
+            return;
+        }
+
+        int previewSize;
+        try
+        {
+            previewSize = int.Parse(request.queryString.Get("size") ?? "256");
+        } catch(Exception e)
+        {
+            ApiError.MalformedRequest(request, "size must be int");
+            return;
+        }
+        
+        // ToDo generate previews before hand so we don't have to do this every time
+        Image image = Image.Load(s.requestedStream);
+        image.Mutate(x => x.Resize(previewSize, previewSize / image.Height * image.Width));
+        MemoryStream ms = new MemoryStream();
+        image.SaveAsWebp(ms);
+        
+
+        request.SendData(ms.ToArray(), HttpServer.GetContentTpe("file.webp"),
+            Encoding.Default, 200, true, new Dictionary<string, string>
+            {
+                {"Content-Disposition", (download ? "attachment; " : "") + "filename=\"" + s.name + ".webp\""}
             });
     }
     
@@ -161,6 +211,19 @@ public class WebServer
             }
 
             DoGetFile(request, path, request.queryString.GetValues(null)?.Contains("download") ?? false);
+            return true;
+        });
+        _server.AddRoute("GET", "/api/v1/preview", request =>
+        {
+            request.allowAllOrigins = true;
+            string? path = request.queryString.Get("path");
+            if(path == null)
+            {
+                ApiError.SendMissingKey("path", request);
+                return true;
+            }
+
+            DoGetFilePreview(request, path, request.queryString.GetValues(null)?.Contains("download") ?? false);
             return true;
         });
         _server.AddRoute("GET", "/api/v1/file_meta", request =>

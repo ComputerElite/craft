@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "sN0CXg62KAQ=",
+  "dgSpecHash": "WJfaS1AdHvc=",
   "success": true,
   "projectFilePath": "/home/computerelite/rider/craft/craft/craft.csproj",
   "expectedPackageFiles": [
@@ -27,6 +27,10 @@
     "/home/computerelite/.nuget/packages/npgsql/6.0.11/npgsql.6.0.11.nupkg.sha512",
     "/home/computerelite/.nuget/packages/npgsql.entityframeworkcore.postgresql/6.0.29/npgsql.entityframeworkcore.postgresql.6.0.29.nupkg.sha512",
     "/home/computerelite/.nuget/packages/qrcoder/1.4.3/qrcoder.1.4.3.nupkg.sha512",
+    "/home/computerelite/.nuget/packages/sixlabors.imagesharp/3.1.5/sixlabors.imagesharp.3.1.5.nupkg.sha512",
+    "/home/computerelite/.nuget/packages/skiasharp/3.0.0-preview.4.1/skiasharp.3.0.0-preview.4.1.nupkg.sha512",
+    "/home/computerelite/.nuget/packages/skiasharp.nativeassets.macos/3.0.0-preview.4.1/skiasharp.nativeassets.macos.3.0.0-preview.4.1.nupkg.sha512",
+    "/home/computerelite/.nuget/packages/skiasharp.nativeassets.win32/3.0.0-preview.4.1/skiasharp.nativeassets.win32.3.0.0-preview.4.1.nupkg.sha512",
     "/home/computerelite/.nuget/packages/system.collections.immutable/6.0.0/system.collections.immutable.6.0.0.nupkg.sha512",
     "/home/computerelite/.nuget/packages/system.diagnostics.diagnosticsource/6.0.1/system.diagnostics.diagnosticsource.6.0.1.nupkg.sha512",
     "/home/computerelite/.nuget/packages/system.drawing.common/6.0.0/system.drawing.common.6.0.0.nupkg.sha512",
