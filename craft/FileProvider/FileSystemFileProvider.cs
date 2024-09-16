@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace craft.FileProvider;
 
 /// <summary>
@@ -5,12 +7,14 @@ namespace craft.FileProvider;
 /// </summary>
 public class FileSystemFileProvider : IFileProvider
 {
-    public string? RootPath { get; set; }
-    public string? MountPoint { get; set; }
+    [Key]
+    public string? id { get; set; }
+    public string? rootPath { get; set; }
+    public string? mountPoint { get; set; }
     string GetRealPath(string path)
     {
         
-        return Path.Join(RootPath, path.Replace(MountPoint, ""));
+        return Path.Join(rootPath, path.Replace(mountPoint, ""));
     }
 
 

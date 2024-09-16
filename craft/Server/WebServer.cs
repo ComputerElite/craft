@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using ComputerUtils.Logging;
 using ComputerUtils.Webserver;
+using craft.DB;
 using craft.FileProvider;
 using craft.Server.ApiTypes;
 using craft.Users;
@@ -14,12 +15,14 @@ public class WebServer
     private HttpServer _server;
     private FileProviderManager _fileProviderManager;
     private UserManager _userManager;
+    private PermissionManager _permissionManager;
     
-    public WebServer(FileProviderManager fileProviderManager, UserManager userManager)
+    public WebServer(FileProviderManager fileProviderManager, UserManager userManager, PermissionManager permissionManager)
     {
         _server = new HttpServer();
         _fileProviderManager = fileProviderManager;
         _userManager = userManager;
+        _permissionManager = permissionManager;
     }
     
     public CraftUser? GetUserBySession(ServerRequest request)
@@ -224,6 +227,90 @@ public class WebServer
             }
             List<CraftUserSession> sessions = _userManager.GetSessionsForUser(u);
             request.SendString(JsonSerializer.Serialize(sessions), "application/json", 200);
+            return true;
+        });
+        // Mount Points
+        
+        _server.AddRoute("POST","/api/v1/admin/mountpoints", request =>
+        {
+            request.allowAllOrigins = true;
+            CraftUser? u = GetUserBySession(request);
+            if (u == null)
+            {
+                ApiError.SendUnauthorized(request);
+                return true;
+            }
+            if (!_permissionManager.HasPermission(u, CraftPermissionType.Administrator))
+            {
+                ApiError.SendForbidden(request);
+                return true;
+            }
+            FileSystemFileProvider f = JsonSerializer.Deserialize<FileSystemFileProvider>(request.bodyString);
+            if(f == null)
+            {
+                ApiError.MalformedRequest(request);
+                return true;
+            }
+
+            _fileProviderManager.CreateFileProvider(f);
+            request.SendString(JsonSerializer.Serialize(_fileProviderManager.GetMountPoints()), "application/json", 200);
+            return true;
+        });
+        _server.AddRoute("GET","/api/v1/admin/mountpoints", request =>
+        {
+            request.allowAllOrigins = true;
+            CraftUser? u = GetUserBySession(request);
+            if (u == null)
+            {
+                ApiError.SendUnauthorized(request);
+                return true;
+            }
+            if (!_permissionManager.HasPermission(u, CraftPermissionType.Administrator))
+            {
+                ApiError.SendForbidden(request);
+                return true;
+            }
+            request.SendString(JsonSerializer.Serialize(_fileProviderManager.GetMountPoints()), "application/json", 200);
+            return true;
+        });
+        _server.AddRoute("GET","/api/v1/admin/filesystem/list_dir", request =>
+        {
+            request.allowAllOrigins = true;
+            CraftUser? u = GetUserBySession(request);
+            if (u == null)
+            {
+                ApiError.SendUnauthorized(request);
+                return true;
+            }
+            if (!_permissionManager.HasPermission(u, CraftPermissionType.Administrator))
+            {
+                ApiError.SendForbidden(request);
+                return true;
+            }
+            request.allowAllOrigins = true;
+            string? path = request.queryString.Get("path");
+            if(path == null)
+            {
+                ApiError.SendMissingKey("path", request);
+                return true;
+            }
+            // Get Directories matching the partially complete path
+            if (!path.Contains("/"))
+            {
+                request.SendString("[]", "application/json", 200);
+                return true;
+            }
+
+            string dir = path;
+            string name = "";
+            if (!path.EndsWith("/"))
+            {
+                dir = dir.Substring(0, path.LastIndexOf("/"));
+                name= path.Substring(path.LastIndexOf("/")+1);
+            }
+            string lowerPath = path.ToLower();
+            List<string> directories = Directory.GetDirectories(dir).Where(x => Path.GetFileName(x.ToLower()).Contains(name)).ToList().ConvertAll(x => x + "/");
+            request.SendString(JsonSerializer.Serialize(directories), "application/json", 200);
             return true;
         });
         _server.StartServer(8383);    

@@ -8,14 +8,13 @@
     }
 </style>
 <div class="flex listFile" on:click={handleClick}>
-    {#if craftFile.isDirectory}
-        <Icon src={folderIcon} />
-    {/if}
+    <CraftFileIcon craftFile={craftFile}></CraftFileIcon>
     <div>{craftFile.name}</div>
 </div>
 <script>
     import folderIcon from "$lib/icons/folder2-open.svg"
     import Icon from "$lib/Icon.svelte";
+    import CraftFileIcon from "$lib/FileBrowser/CraftFileIcon.svelte";
     export let craftFile;
     export let onfileClick;
     function handleClick() {

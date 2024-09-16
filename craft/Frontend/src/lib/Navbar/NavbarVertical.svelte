@@ -8,7 +8,7 @@
 </style>
 <div class="flex vertical navbar">
     <NavBarElement icon={folderOpen} currentSection={currentSection} section="files" updateSection={updateSectionFunction}>Files</NavBarElement>
-    <NavBarElement icon={bg} currentSection={currentSection} section="ipsum" updateSection={updateSectionFunction}>ipsum</NavBarElement>
+    <NavBarElement icon={bg} currentSection={currentSection} section="mountpoints" updateSection={updateSectionFunction}>Mountpoints</NavBarElement>
     <NavBarElement icon={bg} currentSection={currentSection} section="dolor" updateSection={updateSectionFunction}>dolor</NavBarElement>
     <NavBarElement icon={bg} currentSection={currentSection} section="sit" updateSection={updateSectionFunction}>sit</NavBarElement>
 

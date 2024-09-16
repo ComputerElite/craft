@@ -35,6 +35,22 @@ export function openFileDownload(craftFile, localStorage) {
     let path = "http://localhost:8383" + `/api/v1/file?path=${craftFile.path}&session=${localStorage.session}`;
     window.open(path, '_blank');
 }
+
+export function GetNameOfFileFromPath(path) {
+    if(path.endsWith("/")) {
+        path = path.substring(0, path.length - 1);
+    }
+    return path.substring(path.lastIndexOf("/") + 1);
+}
+
+export function GetParentPath(path) {
+    if(path.endsWith("/")) {
+        path = path.substring(0, path.length - 1);
+    }
+    console.log(path)
+    return path.substring(0, path.lastIndexOf("/")) + "/";
+}
+
 export function fetchJson(path, params, localStorage) {
     if(!params) {
         params = {};
@@ -53,6 +69,12 @@ export function fetchJson(path, params, localStorage) {
         path = path.substring(1);
     }
     path = "http://localhost:8383/" + path;
-  return fetch(path, params).then(response => response.json());
+  return fetch(path, params).then(response => {
+    if(!response.ok) {
+        location = "/login?sessionExpired=true"
+        return null;
+    }
+    return response.json()
+  });
 }
 </script>

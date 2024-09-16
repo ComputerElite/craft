@@ -10,6 +10,7 @@ public class CraftDbContext : DbContext
     public DbSet<CraftUser> users { get; set; }
     public DbSet<CraftPermission> permissions { get; set; }
     public DbSet<CraftFile> files { get; set; }
+    public DbSet<FileSystemFileProvider> fileSystemFileProviders { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

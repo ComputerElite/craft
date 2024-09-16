@@ -27,6 +27,8 @@
     import {fetchJson, hashStringSHA256, getRandomString, saveSession} from '$lib/Script.svelte';
     import ErrorBox from "$lib/ErrorBox.svelte";
     import {goto} from "$app/navigation";
+    import { page } from '$app/stores';
+    import {onMount} from "svelte";
 
     function onKeyDownUsername(e) {
         if(e.key == "Enter")password.focus()
@@ -34,6 +36,12 @@
     function onKeyDownPassword(e) {
         if(e.key == "Enter") startLogin()
     }
+    
+   
+    onMount(() => {
+        const sessionExpired = $page.url.searchParams.get('sessionExpired') == "true" || false;
+        loginError = "Session expired. Please log in agian"
+    });
 
     let state = "pwd"
     let username;

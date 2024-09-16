@@ -25,7 +25,7 @@ public class Initializor
         _userManager = new UserManager();
         _permissionManager = new PermissionManager();
         _fileProviderManager = new FileProviderManager(_permissionManager);
-        _server = new WebServer(_fileProviderManager, _userManager);
+        _server = new WebServer(_fileProviderManager, _userManager, _permissionManager);
         _dbClient = new CraftDbContext();
     }
     

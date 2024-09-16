@@ -1,4 +1,5 @@
 using ComputerUtils.Logging;
+using craft.DB;
 using craft.Users;
 
 namespace craft.FileProvider;
@@ -14,8 +15,20 @@ public class FileProviderManager
     public FileProviderManager(PermissionManager permissionManager)
     {
         fileSystemFileProviders = new List<FileSystemFileProvider>();
-        fileSystemFileProviders.AddRange(Config.Config.Instance.FileSystemFileProviders);
         _permissionManager = permissionManager;
+        ReloadFileProvidersFromDB();
+    }
+
+    public void ReloadFileProvidersFromDB()
+    {
+        fileSystemFileProviders.Clear();
+        using (CraftDbContext c = new())
+        {
+            foreach (FileSystemFileProvider f in c.fileSystemFileProviders.AsEnumerable())
+            {
+                fileSystemFileProviders.Add(f);
+            }
+        }
     }
 
     public IFileProvider? GetFileProvider(string path, CraftUser craftUser)
@@ -35,7 +48,7 @@ public class FileProviderManager
         }
         string providerMountPoint = "/" + pathParts[1] + "/";
         Logger.Log("MountPoint: " + providerMountPoint);
-        IFileProvider? fp = fileSystemFileProviders.Find(fp => fp.MountPoint == providerMountPoint);
+        IFileProvider? fp = fileSystemFileProviders.Find(fp => fp.mountPoint == providerMountPoint);
         Logger.Log("Found provider: " + (fp != null));
         return fp;
     }
@@ -57,5 +70,21 @@ public class FileProviderManager
     public static string GetParent(string path)
     {
         return path.Substring(0, path.Substring(0, path.Length - 1).LastIndexOf("/") + 1);
+    }
+
+    public List<FileSystemFileProvider> GetMountPoints()
+    {
+        return fileSystemFileProviders;
+    }
+
+    public void CreateFileProvider(FileSystemFileProvider fileSystemFileProvider)
+    {
+        fileSystemFileProvider.id = Guid.NewGuid().ToString();
+        fileSystemFileProviders.Add(fileSystemFileProvider);
+        using (CraftDbContext c = new())
+        {
+            c.fileSystemFileProviders.Add(fileSystemFileProvider);
+            c.SaveChanges();
+        }
     }
 }

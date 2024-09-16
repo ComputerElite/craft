@@ -51,12 +51,12 @@ public class CraftFile
     public DateTime? created { get; set; }
     public bool isDirectory { get; set; }
     public bool isFileProviderRoot { get; set; }
-    public string fileType
+    public string? fileType
     {
         get
         {
             if (isDirectory) return CraftFileType.Directory;
-            return CraftFileType.fileTypeLoopup.ContainsKey(extension) ? CraftFileType.fileTypeLoopup[extension] : CraftFileType.Unknown;
+            return CraftFileType.fileTypeLoopup.TryGetValue(extension, out var value) ? value : CraftFileType.Unknown;
         }
     }
     public string? displayName;
@@ -76,16 +76,16 @@ public class CraftFileType
     public const string Image = "image";
     public const string Audio = "audio";
     public const string Video = "video";
-    public const string DiskImage = "disk-image";
-    public const string TextFile = "text-file";
+    public const string DiskImage = "diskImage";
+    public const string TextFile = "textFile";
     public const string Archive = "archive";
     public const string Document = "document";
     public const string Website = "website";
     public const string Markdown = "markdown";
     public const string Directory = "directory";
-    public const string Unknown = null;
+    public const string? Unknown = null;
 
-    public static Dictionary<string, string> fileTypeLoopup = new Dictionary<string, string>
+    public static readonly Dictionary<string, string?> fileTypeLoopup = new Dictionary<string, string?>
     {
         { "png", Image },
         { "jpg", Image },
@@ -111,9 +111,6 @@ public class CraftFileType
         { "rar", Archive },
         { "7z", Archive },
         { "pdf", Document },
-        { "zip", Archive },
-        { "7z", Archive },
-        { "rar", Archive },
         { "html", Website },
         { "css", Website },
         { "js", Website }

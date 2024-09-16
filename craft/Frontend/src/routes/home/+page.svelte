@@ -1,6 +1,7 @@
 <script>
     import NavbarVertical from "$lib/Navbar/NavbarVertical.svelte";
     import FileBrowser from "$lib/FileBrowser/FileBrowser.svelte";
+    import MountPointsEditor from "$lib/MountPoints/MountPointsEditor.svelte";
     
     let currentSection = "files"
     
@@ -14,5 +15,7 @@
         <FileBrowser>
             
         </FileBrowser>
+    {:else if currentSection == "mountpoints"}
+        <MountPointsEditor/>
     {/if}
 </div>

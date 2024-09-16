@@ -8,6 +8,13 @@
     --border-radius: 10px;
 }
 
+.content_bg {
+    background-color: var(--bg-color);
+    border-radius: var(--border-radius);
+    padding: var(--content-padding);
+    margin: var(--content-padding);
+}
+
 button {
     border-radius: 10px;
     padding: 10px;
@@ -72,6 +79,11 @@ body::before {
     background-color: #FFF2;
     border-radius: var(--border-radius);
     margin: var(--content-padding);
+}
+
+.scroll_overflow {
+    overflow-y: auto;
+    height: 100%;
 }
 
 .root_container {

@@ -3,6 +3,7 @@
     import {fetchJson, openFileDownload} from '$lib/Script.svelte';
     import {onMount} from "svelte";
     import ListFile from "$lib/FileBrowser/ListFile.svelte";
+    import PathDisplay from "$lib/FileBrowser/PathDisplay.svelte";
     let currentPath = "";
 
     onMount(() => {
@@ -26,6 +27,7 @@
     
     function onPathChange(path) {
         console.log("fetching files for path " + path)
+        currentPath = path;
         fetchJson(`/api/v1/list_dir?path=${path}`, {}, localStorage).then((res) => {
             files = res
         });
@@ -33,8 +35,10 @@
 </script>
 
 <div class="main_container">
-    {#each files as file}
-        
-        <ListFile craftFile={file} onfileClick={onFileClick} />
-    {/each}
+    <PathDisplay path={currentPath} onPathChange={onPathChange} />
+    <div class="scroll_overflow">
+        {#each files as file}
+            <ListFile craftFile={file} onfileClick={onFileClick} />
+        {/each}
+    </div>
 </div>

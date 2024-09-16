@@ -1,10 +1,11 @@
+using ComputerUtils.Logging;
 using craft.Users;
 
 namespace craft.FileProvider;
 
 public class MountPointFileProvider : IFileProvider
 {
-    public string? MountPoint { get; set; } = "";
+    public string? mountPoint { get; set; } = "";
     private CraftUser? CraftUser { get; set; } = null;
     private PermissionManager permissionManager { get; set; }
     private FileProviderManager fileProviderManager { get; set; }
@@ -32,6 +33,7 @@ public class MountPointFileProvider : IFileProvider
         if (this.CraftUser == null) return new List<CraftFile>();
         // Get user permissions
         List<CraftPermission> userPermissions = permissionManager.GetPermissionsForUser(CraftUser);
+        Logger.Log("Found " + userPermissions.Count + " permissions for user " + CraftUser.username);
         // Get all root level permissions
         List<CraftFile> files = new List<CraftFile>();
         foreach(CraftPermission permission in userPermissions)
@@ -42,7 +44,7 @@ public class MountPointFileProvider : IFileProvider
                 return fileProviderManager.fileSystemFileProviders.ConvertAll<CraftFile>(x =>
                     new CraftFile
                     {
-                        path = x.MountPoint ?? "",
+                        path = x.mountPoint ?? "",
                         isDirectory = true,
                         isFileProviderRoot = true
                     }
