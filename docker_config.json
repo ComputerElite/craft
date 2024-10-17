@@ -1,0 +1,4 @@
+{
+    "dbConnectionString": "Server=postgres_craft;Port=5432;Database=craft;Username=craft;Password=craft;",
+    "port": 8383
+}

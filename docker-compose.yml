@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    container_name: postgres_craft  # Optional: name the container
+    environment:
+      POSTGRES_USER: craft     # Set the PostgreSQL user
+      POSTGRES_PASSWORD: craft  # Set the password for the user
+      POSTGRES_DB: craft   # Create a default database
+    ports:
+      - "5432:5432"  # Map the container's PostgreSQL port to your local machine
+    volumes:
+      - postgres_data_craft:/var/lib/postgresql/data  # Persist PostgreSQL data
+    networks:
+      - postgres-network-craft  # Optional: Use a custom network
+  dotnet_app:
+    build:
+      context: .  # Build from the current directory
+      dockerfile: Dockerfile  # Use the specified Dockerfile
+    container_name: dotnet_craft  # Optional: name the container
+    depends_on:
+      - postgres  # Ensure the postgres service starts first
+    ports:
+      - "8383:8383"  # Map container port 80 to host port 5000 (adjust as needed)
+    networks:
+      - postgres-network-craft  # Connect to the same network as PostgreSQL
+
+volumes:
+  postgres_data_craft:   # Define a Docker volume to persist the PostgreSQL data
+
+networks:
+  postgres-network-craft:
+    driver: bridge  # Use the bridge driver for the custom network
