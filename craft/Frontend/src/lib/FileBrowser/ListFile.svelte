@@ -7,7 +7,7 @@
         align-items: center;
     }
 </style>
-<div class="flex listFile" on:click={handleDoubleClick} ondblclick={handleDoubleClick()}>
+<div class="flex listFile" on:click={handleDoubleClick} ondblclick={handleDoubleClick}>
     <CraftFileIcon craftFile={craftFile}></CraftFileIcon>
     <div>{craftFile.name}</div>
 </div>
