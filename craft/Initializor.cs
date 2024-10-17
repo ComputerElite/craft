@@ -1,6 +1,7 @@
 using ComputerUtils.Logging;
 using craft.DB;
 using craft.FileProvider;
+using craft.Indexing;
 using craft.Server;
 using craft.Users;
 using Microsoft.EntityFrameworkCore;
@@ -33,5 +34,19 @@ public class Initializor
     {
         _userManager.CreateDefaultUserIfNotExists();
         _server.Start();
+        
+        // Reindex files
+        Thread t = new Thread(() =>
+        {
+            try
+            {
+                _fileProviderManager.fileIndexer.ReindexEverything();
+            }
+            catch (Exception e)
+            {
+                Logger.Log("Error during indexing: " + e);
+            }
+        });
+        t.Start();
     }
 }

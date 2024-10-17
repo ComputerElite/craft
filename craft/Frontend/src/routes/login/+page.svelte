@@ -40,7 +40,7 @@
    
     onMount(() => {
         const sessionExpired = $page.url.searchParams.get('sessionExpired') == "true" || false;
-        loginError = "Session expired. Please log in agian"
+        if(sessionExpired) loginError = "Session expired. Please log in agian"
     });
 
     let state = "pwd"

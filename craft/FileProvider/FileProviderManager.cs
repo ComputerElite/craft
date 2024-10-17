@@ -1,5 +1,6 @@
 using ComputerUtils.Logging;
 using craft.DB;
+using craft.Indexing;
 using craft.Users;
 
 namespace craft.FileProvider;
@@ -11,11 +12,13 @@ public class FileProviderManager
 {
     public List<FileSystemFileProvider> fileSystemFileProviders;
     private PermissionManager _permissionManager;
+    public FileIndexer fileIndexer;
     
     public FileProviderManager(PermissionManager permissionManager)
     {
         fileSystemFileProviders = new List<FileSystemFileProvider>();
         _permissionManager = permissionManager;
+        fileIndexer = new FileIndexer(this);
         ReloadFileProvidersFromDB();
     }
 

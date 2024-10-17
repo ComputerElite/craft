@@ -70,8 +70,8 @@ public class FileSystemFileProvider : IFileProvider
             craftFile.path = Path.Join(path, directory.Name) +"/";
             craftFile.realPath = directory.FullName;
             craftFile.size = 0;
-            craftFile.lastModified = directory.LastWriteTime;
-            craftFile.created = directory.CreationTime;
+            craftFile.lastModified = directory.LastWriteTime.ToUniversalTime();
+            craftFile.created = directory.CreationTime.ToUniversalTime();
             craftFile.isDirectory = true;
             craftFile.isFileProviderRoot = false;
             files.Add(craftFile);
@@ -82,8 +82,8 @@ public class FileSystemFileProvider : IFileProvider
             craftFile.path = Path.Join(path, file.Name);
             craftFile.realPath = file.FullName;
             craftFile.size = file.Length;
-            craftFile.lastModified = file.LastWriteTime;
-            craftFile.created = file.CreationTime;
+            craftFile.lastModified = file.LastWriteTime.ToUniversalTime();
+            craftFile.created = file.CreationTime.ToUniversalTime();
             craftFile.isDirectory = false;
             craftFile.isFileProviderRoot = false;
             files.Add(craftFile);
@@ -105,8 +105,8 @@ public class FileSystemFileProvider : IFileProvider
         file.realPath = realPath;
         file.path = path;
         file.size = info.Length;
-        file.lastModified = info.LastWriteTime;
-        file.created = info.CreationTime;
+        file.lastModified = info.LastWriteTime.ToUniversalTime();
+        file.created = info.CreationTime.ToUniversalTime();
         file.isDirectory = info.Attributes.HasFlag(FileAttributes.Directory);
         file.isFileProviderRoot = path == "/";
         return file;

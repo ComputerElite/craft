@@ -7,7 +7,7 @@
         align-items: center;
     }
 </style>
-<div class="flex listFile" on:click={handleClick}>
+<div class="flex listFile" on:click={handleDoubleClick} ondblclick={handleDoubleClick()}>
     <CraftFileIcon craftFile={craftFile}></CraftFileIcon>
     <div>{craftFile.name}</div>
 </div>
@@ -18,6 +18,10 @@
     export let craftFile;
     export let onfileClick;
     function handleClick() {
+        console.log("lol")
+    }
+    
+    function handleDoubleClick() {
         onfileClick(craftFile);
     }
 </script>
